@@ -13,6 +13,9 @@ ctx.fillStyle = 'red';
 ctx.fillRect(10, 10, 100, 100);
 ```
 
+## Live Example
+[GPU Canvas / HTML Canvas comparison](https://eriksom.github.io/gpu-canvas/example/)
+
 ## Development
 
 ```bash
