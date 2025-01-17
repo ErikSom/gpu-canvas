@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GPU Canvas</title>
+	<script type="module" src="../dist/gpu-canvas.js"></script>
+
+	<style>
+		canvas {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+	<span>GPU Canvas render time:</span>
+	<span id="gpu-canvas-text">-</span>
+	<gpu-canvas width="400" height="300"></gpu-canvas>
+	<span>HTML Canvas render time:</span>
+	<span id="html-canvas-text">-</span>
+	<canvas id="htmlCanvas" width="400" height="300"></canvas>
+
+	<script>
+		// seeded random
+		function splitmix32($){return function(){$|=0;let i=($=$+2654435769|0)^$>>>16;return i=Math.imul(i,569420461),i^=i>>>15,i=Math.imul(i,1935289751),((i^=i>>>15)>>>0)/4294967296}}
+	</script>
+
+	<script type="module">
+		const canvasGPU = document.querySelector('gpu-canvas');
+		await canvasGPU.ready();
+		const gpuContext = canvasGPU.getContext('2d');
+
+		const canvasHTML = document.querySelector('#htmlCanvas');
+		const htmlContext = canvasHTML.getContext('2d');
+
+		const gpuCanvasText = document.querySelector('#gpu-canvas-text');
+		const htmlCanvasText = document.querySelector('#html-canvas-text');
+
+		function drawTriangles(ctx, n){
+			const random = splitmix32(1337);
+
+			function getRandomColor() {
+				const r = Math.floor(random() * 256);
+				const g = Math.floor(random() * 256);
+				const b = Math.floor(random() * 256);
+				return `rgba(${r}, ${g}, ${b}, 1)`;
+			}
+
+			function getRandomPoint(width, height) {
+				return {
+					x: random() * width,
+					y: random() * height
+				};
+			}
+
+			const width = ctx.canvas.width;
+			const height = ctx.canvas.height;
+
+			for (let i = 0; i < n; i++) {
+				const point1 = getRandomPoint(width, height);
+				const point2 = getRandomPoint(width, height);
+				const point3 = getRandomPoint(width, height);
+
+				ctx.lineWidth = random() * 1.5 + 0.5;
+
+				ctx.fillStyle = getRandomColor();
+				ctx.strokeStyle = getRandomColor();
+
+				ctx.beginPath();
+				ctx.moveTo(point1.x, point1.y);
+				ctx.lineTo(point2.x, point2.y);
+				ctx.lineTo(point3.x, point3.y);
+				ctx.closePath();
+
+				if (random() > 0.3) {
+					ctx.fill();
+				}
+				if (random() > 0.3) {
+					ctx.stroke();
+				}
+			}
+		};
+
+		function draw(n) {
+			const startGPU = performance.now();
+			drawTriangles(gpuContext, n);
+			const endGPU = performance.now();
+			gpuCanvasText.textContent = `${(endGPU - startGPU).toFixed(2)}ms`;
+
+			const startHTML = performance.now();
+			drawTriangles(htmlContext, n);
+			const endHTML = performance.now();
+			htmlCanvasText.textContent = `${(endHTML - startHTML).toFixed(2)}ms`;
+		}
+
+		draw(10000);
+	</script>
+</body>
+</html>
