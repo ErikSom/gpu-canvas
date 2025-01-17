@@ -37,7 +37,9 @@ class GPUCanvas extends HTMLElement {
         this.stage.addChild(this.graphics);
 
         this._ready = true;
-        this.dispatchEvent(new CustomEvent('ready'));
+
+        // safari fires ready before the ready listener is added, so delay it
+        setTimeout(() => this.dispatchEvent(new CustomEvent('ready')), 0);
     }
 
     get fillStyle() {
